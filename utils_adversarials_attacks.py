@@ -53,7 +53,7 @@ def download_dataset():
       key, obj = line.split(" ",1)
       objects = [o for o in obj.split(", ")]
       dictionary = dictionary.append({'key':key, 'object':objects}, ignore_index=True)
-  return dictionary
+    return dictionary
 
 # This is the function used to download the file while displaying a progress bar (not really necessary)
 def download(url, filename):
@@ -122,42 +122,42 @@ def load_HQ_images():
 
     display_images(images,labels.numpy())
 
-  return images_HQ
+    return images_HQ
 
 
 def display_images(images, labels, pred_lab = None, dict_lab=1):
   
-  # Set the size of the figure depending on the number of images to display
-  nb_images = len(images)
+    # Set the size of the figure depending on the number of images to display
+    nb_images = len(images)
 
-  heigt, width = 12, (4*nb_images/4)
-  fig = plt.figure(figsize=(heigt,width))
+    heigt, width = 12, (4*nb_images/4)
+    fig = plt.figure(figsize=(heigt,width))
 
-  # We reverse the transformation pipeline in order to display the images
-  for i in range(nb_images):
-    img = images[i]
-    img = img.numpy().transpose((1, 2, 0))
-    mean = np.array([0.485, 0.456, 0.406])
-    std = np.array([0.229, 0.224, 0.225])
-    img = std * img + mean
-    img = np.clip(img, 0, 1)
+    # We reverse the transformation pipeline in order to display the images
+    for i in range(nb_images):
+      img = images[i]
+      img = img.numpy().transpose((1, 2, 0))
+      mean = np.array([0.485, 0.456, 0.406])
+      std = np.array([0.229, 0.224, 0.225])
+      img = std * img + mean
+      img = np.clip(img, 0, 1)
 
-  # We create the image grid 
-    plt.subplot(int(nb_images/4)+1,4,i+1, frame_on = False, yticks=[], xticks=[])
-    plt.imshow(img)
+    # We create the image grid 
+      plt.subplot(int(nb_images/4)+1,4,i+1, frame_on = False, yticks=[], xticks=[])
+      plt.imshow(img)
 
-  # We display the  |T : True      | labels pairs above each image
-  #                 |P : Predicted |
-  # We only display the first definition of the 
-  # class so it is not too long and the titles don't overlap
-    label = dictionary.iloc[labels[i]].object[0] if (dict_lab==1) else labels[i]
-    if pred_lab == None :
-      plt.title("T: {}".format(label))
-    else :
-      predicted = dictionary.iloc[pred_lab[i]].object[0]
-      plt.title("T: {}\nP: {}"
-      .format(label, predicted))
-    plt.show()
+    # We display the  |T : True      | labels pairs above each image
+    #                 |P : Predicted |
+    # We only display the first definition of the 
+    # class so it is not too long and the titles don't overlap
+      label = dictionary.iloc[labels[i]].object[0] if (dict_lab==1) else labels[i]
+      if pred_lab == None :
+        plt.title("T: {}".format(label))
+      else :
+        predicted = dictionary.iloc[pred_lab[i]].object[0]
+        plt.title("T: {}\nP: {}"
+        .format(label, predicted))
+      plt.show()
 
 def unnormalise(x):
     y = x
@@ -168,128 +168,128 @@ def unnormalise(x):
 
 # Get image
 def adversarial_example_pgd(model, nb_images, images, labels, targeted=None, nb_iter=200, step_size=0.05, epsilon=1):
-  X, Y = images.clone(), labels
-  if nb_images > len(images) : nb_images = 1
-  type_attack = "Targeted" if not targeted == None else "Untargeted"
-  if type_attack == "Untargeted" :
-    print(f"Performing PGD Untargeted Attack, with {nb_iter} iterations with a step of {step_size} and with a perturbation threshold of {epsilon}")
-  else : 
-    print(f"Performing a Targeted Attack targeting the class No {targeted}, with {nb_iter} iterations with a step of {step_size} and with a perturbation threshold of {epsilon}")
-  adv_images = []
-  adv_predictions = []
-  for i in range(nb_images):
-    x = X[i]
-    y = Y[i]
-    x_plot = unnormalise(x).permute(1,2,0).numpy()
-    x = x.unsqueeze(0).to(DEVICE)
+    X, Y = images.clone(), labels
+    if nb_images > len(images) : nb_images = 1
+    type_attack = "Targeted" if not targeted == None else "Untargeted"
+    if type_attack == "Untargeted" :
+      print(f"Performing PGD Untargeted Attack, with {nb_iter} iterations with a step of {step_size} and with a perturbation threshold of {epsilon}")
+    else : 
+      print(f"Performing a Targeted Attack targeting the class No {targeted}, with {nb_iter} iterations with a step of {step_size} and with a perturbation threshold of {epsilon}")
+    adv_images = []
+    adv_predictions = []
+    for i in range(nb_images):
+      x = X[i]
+      y = Y[i]
+      x_plot = unnormalise(x).permute(1,2,0).numpy()
+      x = x.unsqueeze(0).to(DEVICE)
 
-    # Get regular prediction
-    y_pred = model(x)
-    pred_class = y_pred.cpu().data.numpy().argmax()
+      # Get regular prediction
+      y_pred = model(x)
+      pred_class = y_pred.cpu().data.numpy().argmax()
 
-    # Performing Projected Gradient Descent attack
-    y_target = torch.Tensor([targeted]).to(DEVICE).long() if not targeted == None else None
-    x_adv = pgd(model, x, torch.Tensor([y]).to(DEVICE).long(), torch.nn.CrossEntropyLoss(),
-                k=nb_iter, step=step_size, eps=epsilon, norm=2,
-                y_target=y_target
-              )
-    adv_images.append(x_adv.cpu())
-    y_pred_adv = model(x_adv)
-    pred_class_adv = y_pred_adv.cpu().data.numpy().argmax()
-    adv_predictions.append(pred_class_adv)
+      # Performing Projected Gradient Descent attack
+      y_target = torch.Tensor([targeted]).to(DEVICE).long() if not targeted == None else None
+      x_adv = pgd(model, x, torch.Tensor([y]).to(DEVICE).long(), torch.nn.CrossEntropyLoss(),
+                  k=nb_iter, step=step_size, eps=epsilon, norm=2,
+                  y_target=y_target
+                )
+      adv_images.append(x_adv.cpu())
+      y_pred_adv = model(x_adv)
+      pred_class_adv = y_pred_adv.cpu().data.numpy().argmax()
+      adv_predictions.append(pred_class_adv)
 
-    fig, axes = plt.subplots(1, 3, figsize=(15,5))
-    fig.suptitle(f'{type_attack} Attack ')
-    
-    axes[0].imshow(x_plot)
-    axes[0].set_title(
-        f'Real name = {dictionary.iloc[y.item()].object[0]} ({y.item()})\n'
-        f'Predicted name = {dictionary.iloc[pred_class.item()].object[0]}\n'
-        f'P({pred_class.item()}) = '
-        f'{np.round(y_pred.softmax(dim=1)[0, pred_class].item(), 2)}'
-    )
-    axes[0].set_xticks([])
-    axes[0].set_yticks([])
+      fig, axes = plt.subplots(1, 3, figsize=(15,5))
+      fig.suptitle(f'{type_attack} Attack ')
+      
+      axes[0].imshow(x_plot)
+      axes[0].set_title(
+          f'Real name = {dictionary.iloc[y.item()].object[0]} ({y.item()})\n'
+          f'Predicted name = {dictionary.iloc[pred_class.item()].object[0]}\n'
+          f'P({pred_class.item()}) = '
+          f'{np.round(y_pred.softmax(dim=1)[0, pred_class].item(), 2)}'
+      )
+      axes[0].set_xticks([])
+      axes[0].set_yticks([])
 
-    # Adversarial perturbation scaled for increased visibility
-    axes[1].imshow(unnormalise(50*(x_adv - x).squeeze(0)).permute(1, 2, 0).cpu().numpy())
-    axes[1].set_title(
-        f'Noise added to the original image with epsilon = {epsilon}\nand {nb_iter} iterations with a step of {step_size}'
-    )
-    axes[1].set_xticks([])
-    axes[1].set_yticks([])
+      # Adversarial perturbation scaled for increased visibility
+      axes[1].imshow(unnormalise(50*(x_adv - x).squeeze(0)).permute(1, 2, 0).cpu().numpy())
+      axes[1].set_title(
+          f'Noise added to the original image with epsilon = {epsilon}\nand {nb_iter} iterations with a step of {step_size}'
+      )
+      axes[1].set_xticks([])
+      axes[1].set_yticks([])
 
-    axes[2].imshow(x_adv.squeeze(0).permute(1, 2, 0).cpu().numpy())
-    axes[2].set_title(
-        f'Predicted name = {dictionary.iloc[pred_class_adv.item()].object[0]}\n'
-        f'P({pred_class_adv.item()}) = {y_pred_adv.softmax(dim=1)[0, pred_class_adv].item()}'
-    )
-    axes[2].set_xticks([])
-    axes[2].set_yticks([])
+      axes[2].imshow(x_adv.squeeze(0).permute(1, 2, 0).cpu().numpy())
+      axes[2].set_title(
+          f'Predicted name = {dictionary.iloc[pred_class_adv.item()].object[0]}\n'
+          f'P({pred_class_adv.item()}) = {y_pred_adv.softmax(dim=1)[0, pred_class_adv].item()}'
+      )
+      axes[2].set_xticks([])
+      axes[2].set_yticks([])
 
-    plt.show()
-    print(adv_images.type)
-    dataloader_adv = [torch.stack(adv_images), torch.Tensor(adv_predictions)]
-  return dataloader_adv
+      plt.show()
+      print(adv_images.type)
+      dataloader_adv = [torch.stack(adv_images), torch.Tensor(adv_predictions)]
+    return dataloader_adv
 
 # Get image
 def adversarial_example_fgsm(model, nb_images, images, labels, targeted=None, nb_iter=60, step_size=0.01, epsilon=0.5):
-  X, Y = images.clone(), labels
-  if nb_images > len(images) : nb_images = 1
-  type_attack = "Targeted" if not targeted == None else "Untargeted"
-  if type_attack == "Untargeted" :
-    print(f"Performing FGSM Untargeted Attack, with {nb_iter} iterations with a step of {step_size} and with a perturbation threshold of {epsilon}")
-  else : 
-    print(f"Performing FGSM Targeted Attack targeting the class No {targeted}, with {nb_iter} iterations with a step of {step_size} and with a perturbation threshold of {epsilon}")
+    X, Y = images.clone(), labels
+    if nb_images > len(images) : nb_images = 1
+    type_attack = "Targeted" if not targeted == None else "Untargeted"
+    if type_attack == "Untargeted" :
+      print(f"Performing FGSM Untargeted Attack, with {nb_iter} iterations with a step of {step_size} and with a perturbation threshold of {epsilon}")
+    else : 
+      print(f"Performing FGSM Targeted Attack targeting the class No {targeted}, with {nb_iter} iterations with a step of {step_size} and with a perturbation threshold of {epsilon}")
 
-  for i in range(nb_images):
-    x = X[i]
-    y = Y[i]
-    x_plot = unnormalise(x).permute(1,2,0).numpy()
-    x = x.unsqueeze(0).to(DEVICE)
+    for i in range(nb_images):
+      x = X[i]
+      y = Y[i]
+      x_plot = unnormalise(x).permute(1,2,0).numpy()
+      x = x.unsqueeze(0).to(DEVICE)
 
-    # Get regular prediction
-    y_pred = model(x)
-    pred_class = y_pred.cpu().data.numpy().argmax()
+      # Get regular prediction
+      y_pred = model(x)
+      pred_class = y_pred.cpu().data.numpy().argmax()
 
-    # Performing Iterated FGSM attack 
-    y_target = torch.Tensor([targeted]).to(DEVICE).long() if not targeted == None else None
-    x_adv = iterated_fgsm(model, x, torch.Tensor([y]).to(DEVICE).long(), torch.nn.CrossEntropyLoss(),
-                          k=nb_iter, step=step_size, eps=epsilon, norm='inf',
-                          y_target=y_target
-                          )
+      # Performing Iterated FGSM attack 
+      y_target = torch.Tensor([targeted]).to(DEVICE).long() if not targeted == None else None
+      x_adv = iterated_fgsm(model, x, torch.Tensor([y]).to(DEVICE).long(), torch.nn.CrossEntropyLoss(),
+                            k=nb_iter, step=step_size, eps=epsilon, norm='inf',
+                            y_target=y_target
+                            )
 
 
-    y_pred_adv = model(x_adv)
-    pred_class_adv = y_pred_adv.cpu().data.numpy().argmax()
+      y_pred_adv = model(x_adv)
+      pred_class_adv = y_pred_adv.cpu().data.numpy().argmax()
 
-    fig, axes = plt.subplots(1, 3, figsize=(15,5))
-    fig.suptitle(f'{type_attack} Attack ')
-    
-    axes[0].imshow(x_plot)
-    axes[0].set_title(
-        f'Real name = {dictionary.iloc[y.item()].object[0]} ({y.item()})\n'
-        f'Predicted name = {dictionary.iloc[pred_class.item()].object[0]}\n'
-        f'P({pred_class.item()}) = '
-        f'{np.round(y_pred.softmax(dim=1)[0, pred_class].item(), 2)}'
-    )
-    axes[0].set_xticks([])
-    axes[0].set_yticks([])
+      fig, axes = plt.subplots(1, 3, figsize=(15,5))
+      fig.suptitle(f'{type_attack} Attack ')
+      
+      axes[0].imshow(x_plot)
+      axes[0].set_title(
+          f'Real name = {dictionary.iloc[y.item()].object[0]} ({y.item()})\n'
+          f'Predicted name = {dictionary.iloc[pred_class.item()].object[0]}\n'
+          f'P({pred_class.item()}) = '
+          f'{np.round(y_pred.softmax(dim=1)[0, pred_class].item(), 2)}'
+      )
+      axes[0].set_xticks([])
+      axes[0].set_yticks([])
 
-    # Adversarial perturbation scaled for increased visibility
-    axes[1].imshow(unnormalise(50*(x_adv - x).squeeze(0)).permute(1, 2, 0).cpu().numpy())
-    axes[1].set_title(
-        f'Noise added to the original image with epsilon = {epsilon}\nand {nb_iter} iterations with a step of {step_size}'
-    )
-    axes[1].set_xticks([])
-    axes[1].set_yticks([])
+      # Adversarial perturbation scaled for increased visibility
+      axes[1].imshow(unnormalise(50*(x_adv - x).squeeze(0)).permute(1, 2, 0).cpu().numpy())
+      axes[1].set_title(
+          f'Noise added to the original image with epsilon = {epsilon}\nand {nb_iter} iterations with a step of {step_size}'
+      )
+      axes[1].set_xticks([])
+      axes[1].set_yticks([])
 
-    axes[2].imshow(x_adv.squeeze(0).permute(1, 2, 0).cpu().numpy())
-    axes[2].set_title(
-        f'Predicted name = {dictionary.iloc[pred_class_adv.item()].object[0]}\n'
-        f'P({pred_class_adv.item()}) = {y_pred_adv.softmax(dim=1)[0, pred_class_adv].item()}'
-    )
-    axes[2].set_xticks([])
-    axes[2].set_yticks([])
+      axes[2].imshow(x_adv.squeeze(0).permute(1, 2, 0).cpu().numpy())
+      axes[2].set_title(
+          f'Predicted name = {dictionary.iloc[pred_class_adv.item()].object[0]}\n'
+          f'P({pred_class_adv.item()}) = {y_pred_adv.softmax(dim=1)[0, pred_class_adv].item()}'
+      )
+      axes[2].set_xticks([])
+      axes[2].set_yticks([])
 
-    plt.show()
+      plt.show()
