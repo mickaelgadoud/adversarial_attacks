@@ -122,7 +122,7 @@ def load_HQ_images():
     labels = torch.Tensor([281,49,866]).int()
     images_HQ = [images, labels]
 
-    display_images(images,labels.numpy())
+    display_images(images,labels.numpy(), dictionary)
 
     return images_HQ
 
@@ -169,7 +169,7 @@ def unnormalise(x):
     return y
 
 # Get image
-def adversarial_example_pgd(model, nb_images, images, labels, targeted=None, nb_iter=200, step_size=0.05, epsilon=1):
+def adversarial_example_pgd(model, nb_images, images, labels, dictionary, targeted=None, nb_iter=200, step_size=0.05, epsilon=1):
     X, Y = images.clone(), labels
     if nb_images > len(images) : nb_images = 1
     type_attack = "Targeted" if not targeted == None else "Untargeted"
