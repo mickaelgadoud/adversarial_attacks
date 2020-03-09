@@ -50,9 +50,10 @@ def download_dataset():
 
     dictionary = pd.DataFrame(columns=['key','object'])
     for line in list_classes:
-    key, obj = line.split(" ",1)
-    objects = [o for o in obj.split(", ")]
-    dictionary = dictionary.append({'key':key, 'object':objects}, ignore_index=True)
+      key, obj = line.split(" ",1)
+      objects = [o for o in obj.split(", ")]
+      dictionary = dictionary.append({'key':key, 'object':objects}, ignore_index=True)
+  return dictionary
 
 # This is the function used to download the file while displaying a progress bar (not really necessary)
 def download(url, filename):
