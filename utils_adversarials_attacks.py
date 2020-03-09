@@ -21,7 +21,7 @@ import time
 from adversarial.functional import pgd, iterated_fgsm
 
 DEVICE = ''
-if toch.cuda.is_available():
+if torch.cuda.is_available():
     DEVICE = 'cuda'
 else : 
     DEVICE = 'cpu'
