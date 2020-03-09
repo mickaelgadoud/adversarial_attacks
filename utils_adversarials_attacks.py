@@ -235,7 +235,7 @@ def adversarial_example_pgd(model, nb_images, images, labels, dictionary, target
     return dataloader_adv
 
 # Get image
-def adversarial_example_fgsm(model, nb_images, images, labels, targeted=None, nb_iter=60, step_size=0.01, epsilon=0.5):
+def adversarial_example_fgsm(model, nb_images, images, labels, dictionary, targeted=None, nb_iter=60, step_size=0.01, epsilon=0.5):
     X, Y = images.clone(), labels
     if nb_images > len(images) : nb_images = 1
     type_attack = "Targeted" if not targeted == None else "Untargeted"
