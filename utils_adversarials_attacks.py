@@ -18,6 +18,8 @@ import requests
 import tarfile
 import time
 
+from adversarial.functional import pgd, iterated_fgsm
+
 transform_pipeline = transforms.Compose([
       transforms.Resize(256),
       transforms.CenterCrop(224),
@@ -74,7 +76,7 @@ def download(url, filename):
                 sys.stdout.flush()
     sys.stdout.write('\n')
 
-def load_images():
+def load_images(dictionary):
 
     data_dir = "/content/imagenette2-160/train"
 
@@ -125,7 +127,7 @@ def load_HQ_images():
     return images_HQ
 
 
-def display_images(images, labels, pred_lab = None, dict_lab=1):
+def display_images(images, labels, dictionary, pred_lab = None, dict_lab=1):
   
     # Set the size of the figure depending on the number of images to display
     nb_images = len(images)
