@@ -20,12 +20,26 @@ import time
 
 from adversarial.functional import pgd, iterated_fgsm
 
+DEVICE = ''
+if toch.cuda.is_available():
+    DEVICE = 'cuda'
+else : 
+    DEVICE = 'cpu'
+
 transform_pipeline = transforms.Compose([
       transforms.Resize(256),
       transforms.CenterCrop(224),
       transforms.ToTensor(),
       transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
+
+def get_device():
+    dev = ''
+    if torch.cuda.is_available():
+      dev = 'cuda'
+    else:
+      dev = 'cpu'
+    return dev
 
 
 def download_dataset():
@@ -101,7 +115,7 @@ def load_images(dictionary):
 
     return image_dataset, dataloader
 
-def load_HQ_images():
+def load_HQ_images(dictionary):
     cat = "https://icatcare.org/app/uploads/2018/07/Thinking-of-getting-a-cat.png"
     crocodile = "https://cdn.britannica.com/84/198884-050-A37B8971/crocodile-Nile-swath-one-sub-Saharan-Africa-Madagascar.jpg"
     tractor = "https://www.ft.com/__origami/service/image/v2/images/raw/https%3A%2F%2Fs3-ap-northeast-1.amazonaws.com%2Fpsh-ex-ftnikkei-3937bb4%2Fimages%2F3%2F7%2F0%2F4%2F1444073-11-eng-GB%2F20171003_Mahindra.jpg?source=nar-cms"
