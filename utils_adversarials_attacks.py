@@ -159,7 +159,7 @@ def display_images(images, labels, dictionary, pred_lab = None, dict_lab=1):
         predicted = dictionary.iloc[pred_lab[i]].object[0]
         plt.title("T: {}\nP: {}"
         .format(label, predicted))
-      plt.show()
+    plt.show()
 
 def unnormalise(x):
     y = x
